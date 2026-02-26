@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tax Fee Calculator 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+KR:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222222;
+    --border: #2e2e2e;
+    --accent: #c8f03d;
+    --accent2: #3df0a0;
+    --text: #e8e8e8;
+    --muted: #777;
+    --danger: #f05a3d;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans KR', monospace;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .year-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+  }
+
+  /* LAYOUT */
+  .container {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 0;
+    min-height: calc(100vh - 65px);
+  }
+
+  /* LEFT: FORMS */
+  .forms-panel {
+    padding: 32px;
+    overflow-y: auto;
+  }
+
+  .section {
+    margin-bottom: 36px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: #000;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+
+  .section-tag.ny { background: var(--accent2); }
+  .section-tag.nj { background: #f0c83d; }
+  .section-tag.nyc { background: #f05a8a; }
+
+  .section-title {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  .forms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+  }
+
+  /* FORM ITEM */
+  .form-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .form-item:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+
+  .form-item.checked {
+    border-color: var(--accent);
+    background: rgba(200, 240, 61, 0.07);
+  }
+
+  .form-item.checked .form-name { color: var(--accent); }
+
+  /* custom checkbox */
+  .cb {
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .form-item.checked .cb {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .cb-check {
+    display: none;
+    width: 9px;
+    height: 6px;
+    border-left: 2px solid #000;
+    border-bottom: 2px solid #000;
+    transform: rotate(-45deg) translateY(-1px);
+  }
+
+  .form-item.checked .cb-check { display: block; }
+
+  .form-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .form-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .form-desc {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .form-fee {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .form-item.checked .form-fee { color: var(--accent); }
+
+  /* RIGHT: RECEIPT */
+  .receipt-panel {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 28px 24px;
+    position: sticky;
+    top: 65px;
+    height: calc(100vh - 65px);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .receipt-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .receipt-lines {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .receipt-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-6px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .receipt-form-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .receipt-form-amount {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 40px;
+    line-height: 2;
+  }
+
+  .empty-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+    opacity: 0.3;
+  }
+
+  /* TOTAL */
+  .receipt-footer {
+    border-top: 2px solid var(--border);
+    padding-top: 16px;
+    margin-top: 12px;
+  }
+
+  .min-fee-notice {
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 8px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 4px;
+    border-left: 2px solid var(--muted);
+  }
+
+  .min-fee-notice.active {
+    color: var(--danger);
+    border-left-color: var(--danger);
+    background: rgba(240, 90, 61, 0.05);
+  }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .total-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .total-amount {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    transition: all 0.2s;
+  }
+
+  .final-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .final-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .final-amount {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  /* BUTTONS */
+  .btn-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+
+  .btn-primary:hover { background: #d4f550; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover { border-color: var(--muted); color: var(--text); }
+
+  /* CLIENT INFO */
+  .client-section {
+    margin-bottom: 20px;
+  }
+
+  .client-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .client-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: 'IBM Plex Sans KR', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .client-input:focus { border-color: var(--accent); }
+
+  /* SEARCH BAR */
+  .search-bar {
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px 10px 36px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* COUNT BADGE */
+  .count-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    background: var(--surface2);
+    color: var(--muted);
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  /* QTY CONTROL */
+  .qty-control {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .form-item.checked .qty-control { display: flex; }
+
+  .qty-btn {
+    width: 20px;
+    height: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  .qty-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .qty-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .qty-label {
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* AMENDED RETURN ITEMS */
+  .amended-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .amended-item:hover { border-color: var(--accent); }
+  .amended-item.checked { border-color: var(--accent); background: rgba(200,240,61,0.07); }
+  .amended-item.checked .form-name { color: var(--accent); }
+  .amended-item.checked .form-fee { color: var(--accent); }
+
+  /* EXTRA SECTION */
+  .extra-section {
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 768px) {
+    .container { grid-template-columns: 1fr; }
+    .receipt-panel { position: static; height: auto; border-left: none; border-top: 1px solid var(--border); }
+    .forms-panel { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⬡ TAX FEE CALCULATOR</div>
+  <div class="year-badge">NEW YORK · 2026 SCHEDULE</div>
+</header>
+
+<div class="container">
+  <!-- LEFT PANEL -->
+  <div class="forms-panel">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Form 검색... (e.g. Sch. C, IT-201)" oninput="filterForms()">
+    </div>
+
+    <div id="sections-container"></div>
+  </div>
+
+  <!-- RIGHT PANEL (RECEIPT) -->
+  <div class="receipt-panel">
+    <div class="client-section">
+      <div class="client-label">Client Name</div>
+      <input type="text" class="client-input" id="clientName" placeholder="고객명 입력">
+    </div>
+
+    <div class="client-section">
+      <div class="client-label">Tax Year</div>
+      <input type="number" class="client-input" id="taxYear" placeholder="예: 2025" min="2000" max="2030" value="2025" style="width:100%;">
+    </div>
+
+    <!-- AMENDED RETURN -->
+    <div class="client-section">
+      <div class="client-label">📋 Amended Return (수정보고)</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+
+        <label class="amended-item" id="amend-fed-label">
+          <div class="cb" id="amend-fed-cb"><div class="cb-check"></div></div>
+          <div class="form-info">
+            <div class="form-name">1040-X</div>
+            <div class="form-desc">Federal Amended Return</div>
+          </div>
+          <div class="form-fee">$100</div>
+        </label>
+
+        <label class="amended-item" id="amend-ny-label">
+          <div class="cb" id="amend-ny-cb"><div class="cb-check"></div></div>
+          <div class="form-info">
+            <div class="form-name">IT-201-X</div>
+            <div class="form-desc">NY State Amended Return</div>
+          </div>
+          <div class="form-fee">$100</div>
+        </label>
+
+        <label class="amended-item" id="amend-nj-label">
+          <div class="cb" id="amend-nj-cb"><div class="cb-check"></div></div>
+          <div class="form-info">
+            <div class="form-name">NJ-1040-X</div>
+            <div class="form-desc">NJ Amended Return</div>
+          </div>
+          <div class="form-fee">$100</div>
+        </label>
+
+      </div>
+    </div>
+
+    <div class="receipt-title">// Selected Forms</div>
+
+    <div class="receipt-lines" id="receiptLines">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">□</div>
+        Form을 선택하면<br>여기에 표시됩니다
+      </div>
+    </div>
+
+    <div class="receipt-footer">
+
+      <!-- SPECIAL NOTE -->
+      <div class="extra-section">
+        <div class="client-label">📝 Special Note</div>
+        <textarea class="client-input" id="specialNote" rows="2" placeholder="메모 입력 (예: 복잡한 케이스, 수정 신고 등)" style="resize:vertical;line-height:1.5;"></textarea>
+      </div>
+
+      <!-- DISCOUNT -->
+      <div class="extra-section">
+        <div class="client-label">🏷 Discount</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);">%</span>
+          <input type="number" class="client-input" id="discountPct" placeholder="0" min="0" max="100" style="flex:1;" oninput="updateReceipt()">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);">$</span>
+          <input type="number" class="client-input" id="discountAmt" placeholder="0" min="0" style="flex:1;" oninput="updateReceipt()">
+          <input type="text" class="client-input" id="discountLabel" placeholder="사유 (예: Returning client)" style="flex:2;" oninput="updateReceipt()">
+        </div>
+      </div>
+
+      <!-- EXTRA CHARGE -->
+      <div class="extra-section">
+        <div class="client-label">➕ Extra Charge</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);">$</span>
+          <input type="number" class="client-input" id="extraCharge" placeholder="0" min="0" style="flex:1;" oninput="updateReceipt()">
+          <input type="text" class="client-input" id="extraLabel" placeholder="사유 (예: Rush fee)" style="flex:2;" oninput="updateReceipt()">
+        </div>
+      </div>
+
+      <div class="min-fee-notice" id="minFeeNotice">
+        Min. Fee: $200 (기본 최소 금액)
+      </div>
+      <div class="total-row">
+        <div class="total-label">Subtotal</div>
+        <div class="total-amount" id="subtotalDisplay">$0</div>
+      </div>
+      <div id="discountRow" style="display:none;" class="total-row">
+        <div class="total-label" id="discountRowLabel" style="color:#f05a8a;font-size:10px;">Discount</div>
+        <div class="total-amount" id="discountDisplay" style="font-size:16px;color:#f05a8a;">-$0</div>
+      </div>
+      <div id="extraChargeRow" style="display:none;" class="total-row" style="margin-top:6px;">
+        <div class="total-label" id="extraChargeLabel" style="color:var(--accent2);font-size:10px;">Extra</div>
+        <div class="total-amount" id="extraChargeDisplay" style="font-size:16px;color:var(--accent2);">$0</div>
+      </div>
+      <div class="final-row">
+        <div class="final-label">TOTAL DUE</div>
+        <div class="final-amount" id="totalDisplay">$150</div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+        <button class="btn btn-primary" onclick="printReceipt()">Print / Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MIN_FEE = 200;
+
+const formData = {
+  federal: {
+    label: "FEDERAL",
+    tag: "fed",
+    color: "",
+    forms: [
+      { id: "1040", name: "1040", desc: "Individual Income Tax Return", fee: 75 },
+      { id: "efiling", name: "e-Filing", desc: "Electronic Filing Fee", fee: 35 },
+      { id: "sch1A", name: "Sch. 1-A", desc: "Tips & Overtime Deduction (OBBA 2025)", fee: 50 },
+      { id: "schA", name: "Sch. A", desc: "Itemized Deductions", fee: 50 },
+      { id: "schB", name: "Sch. B", desc: "Interest & Dividends", fee: 20 },
+      { id: "schCEZ", name: "Sch. C-EZ", desc: "Simple Business Income", fee: 35 },
+      { id: "schC", name: "Sch. C", desc: "Business Income/Loss", fee: 100 },
+      { id: "schD", name: "Sch. D", desc: "Capital Gains/Losses", fee: 40 },
+      { id: "schE", name: "Sch. E", desc: "Supplemental Income (1st property $40, +$20 each)", fee: 40, hasQty: true, qtyFee: 20 },
+      { id: "schEIC", name: "Sch. EIC", desc: "Earned Income Credit", fee: 20 },
+      { id: "schM", name: "Sch. M", desc: "Making Work Pay Credit", fee: 15 },
+      { id: "schSE", name: "Sch. SE", desc: "Self-Employment Tax", fee: 20 },
+      { id: "f2106", name: "2106", desc: "Employee Business Expenses", fee: 35 },
+      { id: "f2441", name: "2441", desc: "Child & Dependent Care Credit", fee: 35 },
+      { id: "f3903", name: "3903", desc: "Moving Expenses", fee: 35 },
+      { id: "f4562", name: "4562", desc: "Depreciation (1st asset $20, +$10 each)", fee: 20, hasQty: true, qtyFee: 10 },
+      { id: "f8863", name: "8863", desc: "Education Credits", fee: 35 },
+      { id: "f8812", name: "8812", desc: "Additional Child Tax Credit", fee: 20 },
+      { id: "f8880", name: "8880", desc: "Retirement Savings Credit", fee: 20 },
+      { id: "es", name: "ES (Est. Tax)", desc: "Estimated Tax for 2025", fee: 35 },
+      { id: "f4797", name: "4797", desc: "Sale of Business Property", fee: 40 },
+      { id: "f5695", name: "5695", desc: "Residential Energy Credits", fee: 30 },
+      { id: "f8995", name: "8995", desc: "Qualified Business Income Deduction", fee: 30 },
+    ]
+  },
+  nystate: {
+    label: "NEW YORK STATE",
+    tag: "ny",
+    color: "ny",
+    forms: [
+      { id: "it201", name: "IT-201", desc: "Resident Income Tax Return", fee: 40 },
+      { id: "it203", name: "IT-203", desc: "Nonresident/Part-Year Return", fee: 40 },
+      { id: "it201att", name: "IT-201ATT", desc: "Other Tax Credits/Taxes", fee: 20 },
+      { id: "schABC", name: "Sch. A/B/C", desc: "NY Subtractions/Credits", fee: 20 },
+      { id: "it112r", name: "IT-112R", desc: "Resident Credit", fee: 20 },
+      { id: "it213", name: "IT-213", desc: "Child Credit", fee: 20 },
+      { id: "it214", name: "IT-214", desc: "Real Property Tax Credit", fee: 20 },
+      { id: "it215", name: "IT-215", desc: "Earned Income Credit (NY)", fee: 20 },
+      { id: "it216", name: "IT-216", desc: "Child & Dependent Care Credit", fee: 20 },
+      { id: "it272", name: "IT-272", desc: "College Tuition Credit", fee: 20 },
+      { id: "it3601", name: "IT-360.1", desc: "Change of City Resident Status", fee: 35 },
+      { id: "mta6", name: "MTA-6", desc: "MTA Surcharge", fee: 20 },
+      { id: "nyest", name: "NY Est. Tax", desc: "NY Estimated Tax", fee: 35 },
+    ]
+  },
+  njother: {
+    label: "NJ & OTHER STATES",
+    tag: "nj",
+    color: "nj",
+    forms: [
+      { id: "nj1040", name: "NJ-1040", desc: "NJ Resident Income Tax", fee: 30 },
+      { id: "nj1040nr", name: "NJ-1040NR", desc: "NJ Nonresident Income Tax", fee: 30 },
+    ]
+  },
+  nyc: {
+    label: "NEW YORK CITY",
+    tag: "nyc",
+    color: "nyc",
+    forms: [
+      { id: "ubtez", name: "UBT-EZ", desc: "Unincorporated Business Tax (EZ)", fee: 30 },
+      { id: "ubt", name: "UBT", desc: "Unincorporated Business Tax", fee: 50 },
+      { id: "ubtEst", name: "UBT Est.", desc: "UBT Estimated (Next Year)", fee: 50 },
+    ]
+  }
+};
+
+let selected = new Set();
+let qtyMap = {}; // id -> quantity (for hasQty forms)
+
+function buildUI() {
+  const container = document.getElementById('sections-container');
+  container.innerHTML = '';
+
+  for (const [sectionKey, section] of Object.entries(formData)) {
+    const sectionEl = document.createElement('div');
+    sectionEl.className = 'section';
+    sectionEl.dataset.section = sectionKey;
+
+    const count = section.forms.length;
+    sectionEl.innerHTML = `
+      <div class="section-header">
+        <span class="section-tag ${section.color}">${section.tag.toUpperCase()}</span>
+        <span class="section-title">${section.label}</span>
+        <span class="count-badge" id="count-${sectionKey}">${count}</span>
+      </div>
+      <div class="forms-grid" id="grid-${sectionKey}"></div>
+    `;
+
+    container.appendChild(sectionEl);
+
+    const grid = document.getElementById(`grid-${sectionKey}`);
+    section.forms.forEach(form => {
+      const el = createFormItem(form);
+      grid.appendChild(el);
+    });
+  }
+}
+
+function createFormItem(form) {
+  const el = document.createElement('div');
+  el.className = 'form-item' + (selected.has(form.id) ? ' checked' : '');
+  el.dataset.id = form.id;
+  el.dataset.name = form.name.toLowerCase();
+  el.dataset.desc = form.desc.toLowerCase();
+
+  const qtySection = form.hasQty ? `
+    <div class="qty-control" id="qty-control-${form.id}">
+      <button class="qty-btn" onclick="changeQty(event, '${form.id}', -1)">−</button>
+      <span class="qty-value" id="qty-val-${form.id}">${qtyMap[form.id] || 1}</span>
+      <button class="qty-btn" onclick="changeQty(event, '${form.id}', 1)">+</button>
+      <span class="qty-label">properties</span>
+    </div>
+  ` : '';
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;width:100%;">
+      <div class="cb" id="cb-${form.id}"><div class="cb-check"></div></div>
+      <div class="form-info" style="flex:1;min-width:0;">
+        <div class="form-name">${form.name}</div>
+        <div class="form-desc">${form.desc}</div>
+        ${qtySection}
+      </div>
+      <div class="form-fee" id="fee-display-${form.id}">$${form.fee}</div>
+    </div>
+  `;
+
+  el.onclick = (e) => {
+    if (e.target.classList.contains('qty-btn')) return;
+    toggleForm(form.id, el);
+  };
+
+  return el;
+}
+
+function changeQty(e, id, delta) {
+  e.stopPropagation();
+  if (!selected.has(id)) return;
+  const current = qtyMap[id] || 1;
+  const next = Math.max(1, current + delta);
+  qtyMap[id] = next;
+  document.getElementById(`qty-val-${id}`).textContent = next;
+
+  // update fee display
+  const form = findForm(id);
+  if (form) {
+    const total = form.fee + (next - 1) * form.qtyFee;
+    document.getElementById(`fee-display-${id}`).textContent = `$${total}`;
+  }
+  updateReceipt();
+}
+
+function findForm(id) {
+  for (const section of Object.values(formData)) {
+    const f = section.forms.find(f => f.id === id);
+    if (f) return f;
+  }
+  return null;
+}
+
+function toggleForm(id, el) {
+  if (selected.has(id)) {
+    selected.delete(id);
+    delete qtyMap[id];
+    el.classList.remove('checked');
+    const feeEl = document.getElementById(`fee-display-${id}`);
+    const form = findForm(id);
+    if (feeEl && form) feeEl.textContent = `$${form.fee}`;
+    const qtyVal = document.getElementById(`qty-val-${id}`);
+    if (qtyVal) qtyVal.textContent = '1';
+  } else {
+    selected.add(id);
+    qtyMap[id] = 1;
+    el.classList.add('checked');
+  }
+  updateReceipt();
+}
+
+function getFormFee(form) {
+  if (form.hasQty) {
+    const qty = qtyMap[form.id] || 1;
+    return form.fee + (qty - 1) * form.qtyFee;
+  }
+  return form.fee;
+}
+
+function updateReceipt() {
+  const receiptLines = document.getElementById('receiptLines');
+  const subtotalDisplay = document.getElementById('subtotalDisplay');
+  const totalDisplay = document.getElementById('totalDisplay');
+  const minFeeNotice = document.getElementById('minFeeNotice');
+
+  let lines = [];
+  let subtotal = 0;
+  for (const [, section] of Object.entries(formData)) {
+    section.forms.forEach(form => {
+      if (selected.has(form.id)) {
+        const fee = getFormFee(form);
+        lines.push({ ...form, computedFee: fee });
+        subtotal += fee;
+      }
+    });
+  }
+
+  // Add amended returns
+  amendedItems.forEach(item => {
+    if (amendedSelected.has(item.id)) {
+      lines.push({ ...item, computedFee: item.fee, isAmended: true });
+      subtotal += item.fee;
+    }
+  });
+
+  receiptLines.innerHTML = '';
+  if (lines.length === 0) {
+    receiptLines.appendChild(Object.assign(document.createElement('div'), {
+      className: 'empty-state',
+      id: 'emptyState',
+      innerHTML: '<div class="empty-icon">□</div>Form을 선택하면<br>여기에 표시됩니다'
+    }));
+  } else {
+    lines.forEach(form => {
+      const line = document.createElement('div');
+      line.className = 'receipt-line';
+      const qtyNote = form.hasQty && qtyMap[form.id] > 1 ? ` (×${qtyMap[form.id]})` : '';
+      const amendTag = form.isAmended ? ' <span style="font-size:9px;background:#f05a8a;color:#000;padding:1px 5px;border-radius:2px;margin-left:4px;">AMENDED</span>' : '';
+      line.innerHTML = `
+        <span class="receipt-form-name">${form.name}${qtyNote}${amendTag}</span>
+        <span class="receipt-form-amount">$${form.computedFee}</span>
+      `;
+      receiptLines.appendChild(line);
+    });
+  }
+
+  const baseTotal = Math.max(subtotal, MIN_FEE);
+  const extraAmt = parseInt(document.getElementById('extraCharge').value) || 0;
+  const extraLbl = document.getElementById('extraLabel').value || 'Extra Charge';
+  const discountPct = parseFloat(document.getElementById('discountPct').value) || 0;
+  const discountAmt = parseFloat(document.getElementById('discountAmt').value) || 0;
+  const discountLbl = document.getElementById('discountLabel').value || 'Discount';
+
+  const discountFromPct = Math.round(baseTotal * discountPct / 100);
+  const totalDiscount = discountFromPct + discountAmt;
+  const grandTotal = Math.max(0, baseTotal - totalDiscount + extraAmt);
+
+  subtotalDisplay.textContent = '$' + subtotal;
+  totalDisplay.textContent = '$' + grandTotal;
+
+  // discount row
+  const discountRow = document.getElementById('discountRow');
+  const discountDisplay = document.getElementById('discountDisplay');
+  const discountRowLabel = document.getElementById('discountRowLabel');
+  if (totalDiscount > 0) {
+    discountRow.style.display = 'flex';
+    let dLabel = discountLbl;
+    if (discountPct > 0 && discountAmt > 0) dLabel += ` (${discountPct}% + $${discountAmt})`;
+    else if (discountPct > 0) dLabel += ` (${discountPct}%)`;
+    discountRowLabel.textContent = dLabel;
+    discountDisplay.textContent = '-$' + totalDiscount;
+  } else {
+    discountRow.style.display = 'none';
+  }
+
+  // extra charge row
+  const extraRow = document.getElementById('extraChargeRow');
+  const extraDisplay = document.getElementById('extraChargeDisplay');
+  const extraLabelEl = document.getElementById('extraChargeLabel');
+  if (extraAmt > 0) {
+    extraRow.style.display = 'flex';
+    extraDisplay.textContent = '+$' + extraAmt;
+    extraLabelEl.textContent = extraLbl;
+  } else {
+    extraRow.style.display = 'none';
+  }
+
+  if (subtotal < MIN_FEE && subtotal > 0) {
+    minFeeNotice.textContent = `⚠ Min. Fee 적용: $${MIN_FEE} (소계 $${subtotal})`;
+    minFeeNotice.classList.add('active');
+  } else {
+    minFeeNotice.textContent = `Min. Fee: $${MIN_FEE} (기본 최소 금액)`;
+    minFeeNotice.classList.remove('active');
+  }
+}
+
+function clearAll() {
+  selected.clear();
+  qtyMap = {};
+  document.querySelectorAll('.form-item.checked').forEach(el => el.classList.remove('checked'));
+  // reset all fee displays and qty values
+  for (const section of Object.values(formData)) {
+    section.forms.forEach(form => {
+      const feeEl = document.getElementById(`fee-display-${form.id}`);
+      if (feeEl) feeEl.textContent = `$${form.fee}`;
+      const qtyVal = document.getElementById(`qty-val-${form.id}`);
+      if (qtyVal) qtyVal.textContent = '1';
+    });
+  }
+  document.getElementById('clientName').value = '';
+  document.getElementById('taxYear').value = '2025';
+  document.getElementById('specialNote').value = '';
+  document.getElementById('extraCharge').value = '';
+  document.getElementById('extraLabel').value = '';
+  document.getElementById('discountPct').value = '';
+  document.getElementById('discountAmt').value = '';
+  document.getElementById('discountLabel').value = '';
+
+  // reset amended
+  amendedItems.forEach(item => {
+    amendedSelected.delete(item.id);
+    const label = document.getElementById(`${item.id}-label`);
+    const cb = document.getElementById(`${item.id}-cb`);
+    if (label) label.classList.remove('checked');
+    if (cb) {
+      cb.style.background = '';
+      cb.style.borderColor = '';
+      cb.querySelector('.cb-check').style.display = 'none';
+    }
+  });
+
+  updateReceipt();
+}
+
+function filterForms() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+
+  for (const [sectionKey, section] of Object.entries(formData)) {
+    const grid = document.getElementById(`grid-${sectionKey}`);
+    const sectionEl = grid.closest('.section');
+    let visible = 0;
+
+    grid.querySelectorAll('.form-item').forEach(el => {
+      const match = el.dataset.name.includes(query) || el.dataset.desc.includes(query);
+      el.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+
+    document.getElementById(`count-${sectionKey}`).textContent = visible;
+    sectionEl.style.display = visible === 0 && query ? 'none' : '';
+  }
+}
+
+function printReceipt() {
+  const client = document.getElementById('clientName').value || 'Client';
+  const lines = [];
+  let subtotal = 0;
+
+  const taxYear = document.getElementById('taxYear').value || '2025';
+
+  for (const [, section] of Object.entries(formData)) {
+    section.forms.forEach(form => {
+      if (selected.has(form.id)) {
+        const fee = getFormFee(form);
+        const qtyNote = form.hasQty && qtyMap[form.id] > 1 ? ` (×${qtyMap[form.id]})` : '';
+        lines.push({ name: form.name + qtyNote, fee });
+        subtotal += fee;
+      }
+    });
+  }
+
+  // Amended returns
+  amendedItems.forEach(item => {
+    if (amendedSelected.has(item.id)) {
+      lines.push({ name: item.name + ' (Amended)', fee: item.fee });
+      subtotal += item.fee;
+    }
+  });
+
+  const baseTotal = Math.max(subtotal, MIN_FEE);
+  const extraAmt = parseInt(document.getElementById('extraCharge').value) || 0;
+  const extraLbl = document.getElementById('extraLabel').value || 'Extra Charge';
+  const discountPct = parseFloat(document.getElementById('discountPct').value) || 0;
+  const discountAmt = parseFloat(document.getElementById('discountAmt').value) || 0;
+  const discountLbl = document.getElementById('discountLabel').value || 'Discount';
+  const note = document.getElementById('specialNote').value;
+  const discountFromPct = Math.round(baseTotal * discountPct / 100);
+  const totalDiscount = discountFromPct + discountAmt;
+  const grandTotal = Math.max(0, baseTotal - totalDiscount + extraAmt);
+  const date = new Date().toLocaleDateString('en-US');
+
+  // Build HTML invoice
+  const formRows = lines.map(l =>
+    `<tr><td style="padding:6px 0;border-bottom:1px solid #eee;">${l.name}</td><td style="padding:6px 0;border-bottom:1px solid #eee;text-align:right;">$${l.fee}</td></tr>`
+  ).join('');
+
+  const discountRow = totalDiscount > 0 ? `
+    <tr><td style="padding:6px 0;color:#c0392b;">
+      Discount${discountPct > 0 ? ` (${discountPct}%)` : ''}${discountAmt > 0 ? ` + $${discountAmt}` : ''}
+      ${discountLbl ? ' — ' + discountLbl : ''}
+    </td><td style="padding:6px 0;text-align:right;color:#c0392b;">-$${totalDiscount}</td></tr>` : '';
+
+  const extraRow = extraAmt > 0 ? `
+    <tr><td style="padding:6px 0;">${extraLbl}</td><td style="padding:6px 0;text-align:right;">+$${extraAmt}</td></tr>` : '';
+
+  const minFeeRow = subtotal < MIN_FEE && subtotal > 0 ? `
+    <tr><td style="padding:6px 0;font-size:11px;color:#888;">Min. Fee Applied</td><td style="padding:6px 0;text-align:right;font-size:11px;color:#888;">($${MIN_FEE})</td></tr>` : '';
+
+  const noteSection = note ? `<p style="margin-top:16px;font-size:12px;color:#555;border-top:1px solid #eee;padding-top:10px;"><strong>Note:</strong> ${note}</p>` : '';
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: 'Times New Roman', serif; margin: 0; padding: 40px; color: #222; font-size: 13px; }
+  .letterhead { text-align: center; border-bottom: 3px double #1a1a1a; padding-bottom: 16px; margin-bottom: 24px; }
+  .letterhead h1 { font-size: 18px; font-weight: bold; margin: 0 0 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .letterhead p { margin: 2px 0; font-size: 12px; color: #444; }
+  .invoice-meta { display: flex; justify-content: space-between; margin-bottom: 20px; }
+  .invoice-to h3 { font-size: 12px; text-transform: uppercase; color: #888; margin: 0 0 4px; }
+  .invoice-to p { margin: 2px 0; font-size: 13px; }
+  .invoice-date { text-align: right; font-size: 12px; color: #555; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  .total-section { border-top: 2px solid #1a1a1a; margin-top: 8px; }
+  .total-section td { padding: 8px 0; font-weight: bold; font-size: 15px; }
+  .payment-box { margin-top: 28px; border: 1px solid #ccc; border-radius: 4px; padding: 14px 16px; font-size: 12px; background: #fafafa; }
+  .payment-box h4 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #555; }
+  .payment-box p { margin: 4px 0; }
+  @media print { body { padding: 20px; } }
+</style>
+</head>
+<body>
+
+<div class="letterhead">
+  <h1>JP Accounting &amp; Tax Services, Inc.</h1>
+  <p>Certified Public Accountant</p>
+  <p>194-02 Northern Blvd. Ste. 213, Flushing, N.Y. 11358</p>
+  <p>Tel: 929-314-5024 &nbsp;|&nbsp; Fax: 718-679-9322</p>
+</div>
+
+<div class="invoice-meta">
+  <div class="invoice-to">
+    <h3>Bill To</h3>
+    <p><strong>${client}</strong></p>
+  </div>
+  <div class="invoice-date">
+    <p><strong>Invoice Date:</strong> ${date}</p>
+    <p style="color:#888;font-size:11px;">Tax Year ${taxYear}</p>
+  </div>
+</div>
+
+<p style="margin-bottom:8px;">For professional services rendered in connection with:</p>
+<p style="margin-bottom:12px;font-style:italic;">Preparation of Income Tax Returns for Tax Year ${taxYear}:</p>
+
+<table>
+  <thead>
+    <tr style="border-bottom:2px solid #1a1a1a;">
+      <th style="text-align:left;padding:6px 0;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;">Description</th>
+      <th style="text-align:right;padding:6px 0;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;">Fee</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${lines.length > 0 ? formRows : '<tr><td colspan="2" style="padding:12px 0;color:#888;text-align:center;">(No forms selected)</td></tr>'}
+    ${minFeeRow}
+  </tbody>
+  <tbody class="total-section">
+    ${discountRow}
+    ${extraRow}
+    <tr>
+      <td style="padding:10px 0;font-size:16px;font-weight:bold;">TOTAL DUE</td>
+      <td style="padding:10px 0;font-size:16px;font-weight:bold;text-align:right;">$${grandTotal}</td>
+    </tr>
+  </tbody>
+</table>
+
+${noteSection}
+
+<div class="payment-box">
+  <h4>Payment Information</h4>
+  <p>✉ Check payable to: <strong>JP Accounting &amp; Tax Service, Inc.</strong></p>
+  <p>📬 Mailing Address: 194-02 Northern Blvd. Ste. 213, Flushing, NY 11358</p>
+  <p>💳 Zelle: <strong>ASKJPTAX@GMAIL.COM</strong></p>
+</div>
+
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(() => win.print(), 500);
+}
+
+// Amended return toggles
+const amendedItems = [
+  { id: 'amend-fed', name: '1040-X', desc: 'Federal Amended Return', fee: 100 },
+  { id: 'amend-ny',  name: 'IT-201-X', desc: 'NY State Amended Return', fee: 100 },
+  { id: 'amend-nj',  name: 'NJ-1040-X', desc: 'NJ Amended Return', fee: 100 },
+];
+const amendedSelected = new Set();
+
+buildUI();
+updateReceipt();
+
+amendedItems.forEach(item => {
+  const label = document.getElementById(`${item.id}-label`);
+  const cb = document.getElementById(`${item.id}-cb`);
+  label.onclick = () => {
+    if (amendedSelected.has(item.id)) {
+      amendedSelected.delete(item.id);
+      label.classList.remove('checked');
+      cb.style.background = '';
+      cb.style.borderColor = '';
+      cb.querySelector('.cb-check').style.display = 'none';
+    } else {
+      amendedSelected.add(item.id);
+      label.classList.add('checked');
+      cb.style.background = 'var(--accent)';
+      cb.style.borderColor = 'var(--accent)';
+      cb.querySelector('.cb-check').style.display = 'block';
+    }
+    updateReceipt();
+  };
+});
+</script>
+</body>
+</html>
