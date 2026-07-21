@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2025 Deduction Questionnaire - Esther Park</title>
+<style>
+  :root {
+    --paper: #FAFAF7;
+    --card: #FFFFFF;
+    --ink: #22303A;
+    --ink-soft: #5A6B76;
+    --line: #E4E6E1;
+    --teal: #0E6E63;
+    --teal-soft: #E3F0EE;
+    --amber: #9C6A1D;
+    --amber-soft: #FBF3E4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.55;
+    padding-bottom: 120px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
+
+  header { margin-bottom: 28px; }
+  .firm {
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--teal); font-weight: 600; margin-bottom: 10px;
+  }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 30px; line-height: 1.2; font-weight: 500; margin-bottom: 10px;
+  }
+  .intro { color: var(--ink-soft); font-size: 15px; }
+  .intro strong { color: var(--ink); font-weight: 600; }
+
+  .docs-card {
+    background: var(--amber-soft); border: 1px solid #EAD9B8;
+    border-radius: 14px; padding: 18px; margin-bottom: 26px;
+  }
+  .docs-card h2 { font-size: 16px; margin-bottom: 6px; }
+  .docs-card p { font-size: 14px; color: #6B5A38; margin-bottom: 12px; }
+  .doc-choices { display: flex; flex-direction: column; gap: 8px; }
+  .doc-choice {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; border: 1.5px solid #EAD9B8; border-radius: 10px;
+    padding: 12px 14px; font-size: 14px; cursor: pointer; user-select: none;
+  }
+  .doc-choice.selected { border-color: var(--amber); background: #FFF9EF; font-weight: 600; }
+  .doc-choice .dot {
+    width: 18px; height: 18px; border-radius: 50%; border: 2px solid #CBB489; flex-shrink: 0;
+  }
+  .doc-choice.selected .dot { border-color: var(--amber); background: var(--amber); }
+
+  .section-label {
+    font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-soft); font-weight: 600; margin: 26px 0 12px;
+  }
+
+  .item {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 16px; margin-bottom: 12px;
+  }
+  .item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .item-title { font-size: 15px; font-weight: 600; }
+  .item-hint { font-size: 13px; color: var(--ink-soft); margin-top: 3px; }
+
+  .toggle { display: flex; gap: 6px; flex-shrink: 0; }
+  .toggle button {
+    border: 1.5px solid var(--line); background: #fff; color: var(--ink-soft);
+    border-radius: 999px; padding: 7px 16px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .toggle button.yes.active { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .toggle button.no.active { background: var(--ink-soft); border-color: var(--ink-soft); color: #fff; }
+
+  .detail { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); }
+  .item.open .detail { display: block; }
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 13px; color: var(--ink-soft); margin-bottom: 4px; }
+  .field input[type="text"], .field input[type="number"], .field textarea {
+    width: 100%; border: 1.5px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; font-size: 16px; font-family: inherit; background: #FDFDFB;
+  }
+  .field input:focus, .field textarea:focus { outline: 2px solid var(--teal-soft); border-color: var(--teal); }
+  .money { position: relative; }
+  .money span {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--ink-soft); font-size: 15px;
+  }
+  .money input { padding-left: 26px !important; }
+
+  .tally {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--ink); color: #fff; padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.12);
+  }
+  .tally .label { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #B9C4CB; }
+  .tally .amount { font-family: Georgia, serif; font-size: 22px; }
+  .tally button {
+    background: var(--teal); color: #fff; border: none; border-radius: 999px;
+    padding: 12px 20px; font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+
+  .summary-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(24,32,38,0.55);
+    z-index: 50; padding: 20px; overflow-y: auto;
+  }
+  .summary-overlay.show { display: block; }
+  .summary-card {
+    background: #fff; border-radius: 16px; max-width: 640px; margin: 20px auto;
+    padding: 22px;
+  }
+  .summary-card h2 { font-family: Georgia, serif; font-size: 22px; margin-bottom: 6px; }
+  .summary-card .sub { font-size: 14px; color: var(--ink-soft); margin-bottom: 14px; }
+  .summary-text {
+    width: 100%; min-height: 260px; border: 1.5px solid var(--line); border-radius: 10px;
+    padding: 12px; font-size: 13px; font-family: ui-monospace, Menlo, monospace;
+    white-space: pre-wrap; background: #FDFDFB;
+  }
+  .summary-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--teal); color: #fff; border: none; border-radius: 999px;
+    padding: 12px 20px; font-size: 14px; font-weight: 700; cursor: pointer; flex: 1;
+  }
+  .btn-ghost {
+    background: #fff; color: var(--ink); border: 1.5px solid var(--line); border-radius: 999px;
+    padding: 12px 20px; font-size: 14px; font-weight: 600; cursor: pointer; flex: 1;
+  }
+  .copied { background: var(--amber) !important; }
+
+  .sep-card {
+    background: var(--teal-soft); border: 1px solid #C4DDD9; border-radius: 14px;
+    padding: 18px; margin-top: 26px;
+  }
+  .sep-card h2 { font-size: 16px; margin-bottom: 6px; }
+  .sep-card p { font-size: 14px; color: #3E5A55; margin-bottom: 12px; }
+
+  footer { margin-top: 30px; font-size: 12px; color: var(--ink-soft); text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="firm">JP Accounting &amp; Tax Services</div>
+    <h1>2025 Deduction Questionnaire</h1>
+    <p class="intro">Hi Esther! Tap <strong>Yes</strong> on anything that applies to your 1099 work in 2025 and fill in what you can. <strong>Estimates are fine.</strong> When you're done, tap <strong>Finish</strong> at the bottom and your answers will be put together for you to send back to me. It usually takes about 5 minutes. - Julie</p>
+  </header>
+
+  <div class="docs-card">
+    <h2>First: Nolan's documents</h2>
+    <p>I don't see Nolan's Social Security card and birth certificate in the secure folder yet. I need them to claim him as a dependent and apply the child tax credit. Please upload them to the ShareFile portal (not by email).</p>
+    <div class="doc-choices" id="docChoices">
+      <div class="doc-choice" data-val="I already uploaded Nolan's documents - please check again"><div class="dot"></div>I already uploaded them - please check again</div>
+      <div class="doc-choice" data-val="I will upload Nolan's documents to the portal today"><div class="dot"></div>I'll upload them to the portal today</div>
+      <div class="doc-choice" data-val="I need help accessing the portal"><div class="dot"></div>I need help accessing the portal</div>
+    </div>
+  </div>
+
+  <div class="section-label">Professional costs</div>
+
+  <div class="item" data-name="Professional fees (DEA, board certification, credentialing, other licenses)">
+    <div class="item-top">
+      <div>
+        <div class="item-title">Professional fees</div>
+        <div class="item-hint">DEA registration, board certification or MOC fees, hospital credentialing dues, any license fees besides the $580 you already sent</div>
+      </div>
+      <div class="toggle"><button class="yes">Yes</button><button class="no">No</button></div>
+    </div>
+    <div class="detail">
+      <div class="field money"><span>$</span><input type="number" inputmode="decimal" class="amt" placeholder="Total amount"></div>
+      <div class="field"><input type="text" class="note" placeholder="What was it for? (optional)"></div>
+    </div>
+  </div>
+
+  <div class="item" data-name="Professional society memberships (ASA, medical societies)">
+    <div class="item-top">
+      <div>
+        <div class="item-title">Society memberships</div>
+        <div class="item-hint">ASA, state or county medical society, other professional organizations</div>
+      </div>
+      <div class="toggle"><button class="yes">Yes</button><button class="no">No</button></div>
+    </div>
+    <div class="detail">
+      <div class="field money"><span>$</span><input type="number" inputmode="decimal" class="amt" placeholder="Total amount"></div>
+      <div class="field"><input type="text" class="note" placeholder="Which organizations? (optional)"></div>
+    </div>
+  </div>
+
+  <div class="item" data-name="Continuing medical education (courses, conferences, related travel)">
+    <div class="item-top">
+      <div>
+        <div class="item-title">Continuing education</div>
+        <div class="item-hint">CME courses or conferences, plus travel, hotel, or airfare to attend</div>
+      </div>
+      <div class="toggle"><button class="yes">Yes</button><button class="no">No</button></div>
+    </div>
+    <div class="detail">
+      <div class="field money"><span>$</span><input type="number" inputmode="decimal" class="amt" placeholder="Total amount"></div>
+      <div class="field"><input type="text" class="note" placeholder="What and where? (optional)"></div>
+    </div>
+  </div>
+
+  <div class="item" data-name="Medical subscriptions and references (UpToDate, journals, apps)">
+    <div class="item-top">
+      <div>
+        <div class="item-title">Subscriptions &amp; references</div>
+        <div class="item-hint">UpToDate, medical journals, clinical apps</div>
+      </div>
+      <div class="toggle"><button class="yes">Yes</button><button class="no">No</button></div>
+    </div>
+    <div class="detail">
+      <div class="field money"><span>$</span><input type="number" inputmode="decimal" class="amt" placeholder="Total amount"></div>
+    </div>
+  </div>
+
+  <div class="item" data-name="Equipment and supplies (stethoscope, scrubs, work-only shoes, instruments)">
+    <div class="item-top">
+      <div>
+        <div class="item-title">Equipment &amp; supplies</div>
+        <div class="item-hint">Stethoscope, scrubs, shoes worn only at work, instruments you purchased</div>
+      </div>
+      <div class="toggle"><button class="yes">Yes</button><button class="no">No</button></div>
+    </div>
+    <div class="detail">
+      <div class="field money"><span>$</span><input type="number" inputmode="decimal" class="amt" placeholder="Total amount"></div>
+      <div class="field"><input type="text" class="note" placeholder="What did you buy? (optional)"></div>
+    </div>
+  </div>
+
+  <div class="section-label">Phone, computer &amp; workspace</div>
+
+  <div class="item" data-name="Cell phone used for work">
+    <div class="item-top">
+      <div>
+        <div class="item-title">Cell phone</div>
+        <div class="item-hint">Used for work calls, scheduling, hospital apps</div>
+      </div>
+      <div class="toggle"><button class="yes">Yes</button><button class="no">No</button></div>
+    </div>
+    <div class="detail">
+      <div class="field money"><span>$</span><input type="number" inputmode="decimal" class="amt" placeholder="Monthly bill"></div>
+      <div class="field"><label>Roughly what % was work use?</label><input type="number" inputmode="numeric" class="note" placeholder="e.g. 30"></div>
+    </div>
+  </div>
+
+  <div class="item" data-name="Computer or tablet used for work">
+    <div class="item-top">
+      <div>
+        <div class="item-title">Computer or tablet</div>
+        <div class="item-hint">Used for charting, billing, or scheduling</div>
+      </div>
+      <div class="toggle"><button class="yes">Yes</button><button class="no">No</button></div>
+    </div>
+    <div class="detail">
+      <div class="field money"><span>$</span><input type="number" inputmode="decimal" class="amt" placeholder="Purchase price"></div>
+      <div class="field"><label>Roughly what % was work use?</label><input type="number" inputmode="numeric" class="note" placeholder="e.g. 50"></div>
+    </div>
+  </div>
+
+  <div class="item" data-name="Home office (dedicated space for billing, charting, scheduling)">
+    <div class="item-top">
+      <div>
+        <div class="item-title">Home office</div>
+        <div class="item-hint">A space at home used regularly and only for your admin work (billing, charting, scheduling)</div>
+      </div>
+      <div class="toggle"><button class="yes">Yes</button><button class="no">No</button></div>
+    </div>
+    <div class="detail">
+      <div class="field"><label>Approximate square footage of that space</label><input type="number" inputmode="numeric" class="amt-raw" placeholder="e.g. 120"></div>
+      <div class="field"><label>Approximate square footage of your whole home</label><input type="number" inputmode="numeric" class="note" placeholder="e.g. 2400"></div>
+    </div>
+  </div>
+
+  <div class="section-label">Getting to work</div>
+
+  <div class="item" data-name="Travel between work locations">
+    <div class="item-top">
+      <div>
+        <div class="item-title">Multiple work locations</div>
+        <div class="item-hint">Did your 1099 work take you to more than one hospital or surgery center?</div>
+      </div>
+      <div class="toggle"><button class="yes">Yes</button><button class="no">No</button></div>
+    </div>
+    <div class="detail">
+      <div class="field"><label>Which locations did you work at?</label><textarea class="note" rows="2" placeholder="e.g. Hackensack UMC, Bergen Surgical Center"></textarea></div>
+      <div class="field"><label>Roughly how many days per month at each?</label><input type="text" class="note2" placeholder="e.g. Hackensack 10 days, Bergen 5 days"></div>
+      <div class="field"><label>Approximate round-trip miles per location</label><input type="text" class="note3" placeholder="e.g. Hackensack 30 mi, Bergen 22 mi"></div>
+    </div>
+  </div>
+
+  <div class="item" data-name="Parking and tolls at work locations">
+    <div class="item-top">
+      <div>
+        <div class="item-title">Parking &amp; tolls</div>
+        <div class="item-hint">At hospitals or surgery centers</div>
+      </div>
+      <div class="toggle"><button class="yes">Yes</button><button class="no">No</button></div>
+    </div>
+    <div class="detail">
+      <div class="field money"><span>$</span><input type="number" inputmode="decimal" class="amt" placeholder="Total for the year (estimate is fine)"></div>
+    </div>
+  </div>
+
+  <div class="section-label">Other</div>
+
+  <div class="item" data-name="Professional or legal fees related to the 1099 work">
+    <div class="item-top">
+      <div>
+        <div class="item-title">Professional/legal fees</div>
+        <div class="item-hint">Contract review, tax or legal advice for the 1099 work</div>
+      </div>
+      <div class="toggle"><button class="yes">Yes</button><button class="no">No</button></div>
+    </div>
+    <div class="detail">
+      <div class="field money"><span>$</span><input type="number" inputmode="decimal" class="amt" placeholder="Total amount"></div>
+    </div>
+  </div>
+
+  <div class="item" data-name="Other business insurance beyond malpractice">
+    <div class="item-top">
+      <div>
+        <div class="item-title">Other insurance</div>
+        <div class="item-hint">Liability or business insurance besides the malpractice payment I already have</div>
+      </div>
+      <div class="toggle"><button class="yes">Yes</button><button class="no">No</button></div>
+    </div>
+    <div class="detail">
+      <div class="field money"><span>$</span><input type="number" inputmode="decimal" class="amt" placeholder="Total amount"></div>
+    </div>
+  </div>
+
+  <div class="item" data-name="Anything else paid out of pocket for the contract work">
+    <div class="item-top">
+      <div>
+        <div class="item-title">Anything else?</div>
+        <div class="item-hint">Any other out-of-pocket cost required for the contract work</div>
+      </div>
+      <div class="toggle"><button class="yes">Yes</button><button class="no">No</button></div>
+    </div>
+    <div class="detail">
+      <div class="field"><textarea class="note" rows="2" placeholder="Describe it and the amount"></textarea></div>
+    </div>
+  </div>
+
+  <div class="sep-card">
+    <h2>One more opportunity: SEP IRA</h2>
+    <p>Because we filed an extension, you can still open and fund a SEP IRA for 2025 based on your 1099 income. This could mean a deduction of roughly up to $25,000 and a noticeably larger refund. Want me to run the numbers for you?</p>
+    <div class="doc-choices" id="sepChoices">
+      <div class="doc-choice" data-val="Yes, please run the SEP IRA numbers"><div class="dot"></div>Yes, run the numbers for me</div>
+      <div class="doc-choice" data-val="Tell me more about the SEP IRA first"><div class="dot"></div>Tell me more first</div>
+      <div class="doc-choice" data-val="Not interested in the SEP IRA"><div class="dot"></div>Not this year</div>
+    </div>
+  </div>
+
+  <footer>JP Accounting &amp; Tax Services, Inc. &middot; Your answers stay on this page until you send them to Julie.</footer>
+</div>
+
+<div class="tally">
+  <div>
+    <div class="label">Entered so far</div>
+    <div class="amount" id="tallyAmt">$0</div>
+  </div>
+  <button id="finishBtn">Finish &amp; review</button>
+</div>
+
+<div class="summary-overlay" id="overlay">
+  <div class="summary-card">
+    <h2>Your answers</h2>
+    <div class="sub">Tap Copy, then paste into a text or email to Julie. Or use the email button below.</div>
+    <div class="summary-text" id="summaryText"></div>
+    <div class="summary-actions">
+      <button class="btn-primary" id="copyBtn">Copy answers</button>
+      <button class="btn-ghost" id="closeBtn">Go back</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const items = document.querySelectorAll('.item');
+  items.forEach(item => {
+    const yes = item.querySelector('.yes');
+    const no = item.querySelector('.no');
+    yes.addEventListener('click', () => {
+      yes.classList.add('active'); no.classList.remove('active');
+      item.classList.add('open');
+      updateTally();
+    });
+    no.addEventListener('click', () => {
+      no.classList.add('active'); yes.classList.remove('active');
+      item.classList.remove('open');
+      updateTally();
+    });
+    item.querySelectorAll('input, textarea').forEach(inp => {
+      inp.addEventListener('input', updateTally);
+    });
+  });
+
+  function singleSelect(containerId) {
+    const box = document.getElementById(containerId);
+    box.querySelectorAll('.doc-choice').forEach(ch => {
+      ch.addEventListener('click', () => {
+        box.querySelectorAll('.doc-choice').forEach(c => c.classList.remove('selected'));
+        ch.classList.add('selected');
+      });
+    });
+  }
+  singleSelect('docChoices');
+  singleSelect('sepChoices');
+
+  function updateTally() {
+    let total = 0;
+    items.forEach(item => {
+      if (item.classList.contains('open')) {
+        const amt = item.querySelector('.amt');
+        if (amt && amt.value) total += parseFloat(amt.value) || 0;
+      }
+    });
+    document.getElementById('tallyAmt').textContent = '$' + total.toLocaleString(undefined, {maximumFractionDigits: 0});
+  }
+
+  document.getElementById('finishBtn').addEventListener('click', () => {
+    const lines = [];
+    lines.push('2025 DEDUCTION QUESTIONNAIRE - Esther Park');
+    lines.push('');
+
+    const doc = document.querySelector('#docChoices .doc-choice.selected');
+    lines.push("Nolan's documents: " + (doc ? doc.dataset.val : 'Not answered'));
+    lines.push('');
+
+    let answeredYes = 0, answeredNo = 0;
+    items.forEach(item => {
+      const name = item.dataset.name;
+      const yesActive = item.querySelector('.yes').classList.contains('active');
+      const noActive = item.querySelector('.no').classList.contains('active');
+      if (yesActive) {
+        answeredYes++;
+        lines.push('YES - ' + name);
+        const amt = item.querySelector('.amt');
+        if (amt && amt.value) lines.push('   Amount: $' + parseFloat(amt.value).toLocaleString());
+        const amtRaw = item.querySelector('.amt-raw');
+        if (amtRaw && amtRaw.value) lines.push('   Office space: ' + amtRaw.value + ' sq ft');
+        const note = item.querySelector('.note');
+        if (note && note.value) lines.push('   Detail: ' + note.value);
+        const note2 = item.querySelector('.note2');
+        if (note2 && note2.value) lines.push('   Days per month: ' + note2.value);
+        const note3 = item.querySelector('.note3');
+        if (note3 && note3.value) lines.push('   Round-trip miles: ' + note3.value);
+        lines.push('');
+      } else if (noActive) {
+        answeredNo++;
+      }
+    });
+
+    if (answeredNo > 0) {
+      lines.push('Answered NO to ' + answeredNo + ' item(s).');
+      lines.push('');
+    }
+    const unanswered = items.length - answeredYes - answeredNo;
+    if (unanswered > 0) {
+      lines.push('(' + unanswered + ' item(s) left unanswered)');
+      lines.push('');
+    }
+
+    const sep = document.querySelector('#sepChoices .doc-choice.selected');
+    lines.push('SEP IRA: ' + (sep ? sep.dataset.val : 'Not answered'));
+
+    document.getElementById('summaryText').textContent = lines.join('\n');
+    document.getElementById('overlay').classList.add('show');
+  });
+
+  document.getElementById('closeBtn').addEventListener('click', () => {
+    document.getElementById('overlay').classList.remove('show');
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    const text = document.getElementById('summaryText').textContent;
+    const btn = document.getElementById('copyBtn');
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy answers'; btn.classList.remove('copied'); }, 2000);
+    } catch (e) {
+      const range = document.createRange();
+      range.selectNodeContents(document.getElementById('summaryText'));
+      const sel = window.getSelection();
+      sel.removeAllRanges(); sel.addRange(range);
+      btn.textContent = 'Select all + copy manually';
+    }
+  });
+</script>
+</body>
+</html>
